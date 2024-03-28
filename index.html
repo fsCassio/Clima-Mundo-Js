@@ -7,9 +7,7 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!-- quebra de linha automatica alt z -->
     <div class="card">
-
       <div class="search">
         <input
           type="text"
@@ -19,46 +17,89 @@
         <button><img src="assets/searching_5251636.png" /></button>
       </div>
 
+      <div class="error">
+        <p>Cidade invalida.</p>
+      </div>
+
       <div class="weather">
         <img src="assets/rainy-day_10961114.png" class="weather-icon" />
         <h1 class="temp">22°C</h1>
         <h2 class="city">Novo Mexico</h2>
         <div class="details">
-            <div class="col">
-                <img src="assets/drop_1715910.png">
-                <div>
-                    <p class="humidity">50%</p>
-                    <p>Humidade do ar</p>
-                </div>
+          <div class="col">
+            <img src="assets/drop_1715910.png" />
+            <div>
+              <p class="humidity">50%</p>
+              <p>Humidade do ar</p>
             </div>
-            <div class="col">
-                <img src="assets/wind_8504423.png">
-                <div>
-                    <p class="wind">15 km/h</p>
-                    <p>Vento</p>
-                </div>
+          </div>
+          <div class="col">
+            <img src="assets/wind_8504423.png" />
+            <div>
+              <p class="wind">15 km/h</p>
+              <p>Vento</p>
             </div>
+          </div>
         </div>
       </div>
-
     </div>
 
-
     <script>
-        // pegando os parametros da api
-        const apiKey = "dfc2b2d29aeb446ebd4ded655bc8d383";
-        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=berlin";
+      // pegando os parametros da api
+      const apiKey = "dfc2b2d29aeb446ebd4ded655bc8d383";
+      const apiUrl =
+        "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
 
-        // funcao que vai usar os parametros da api
-        async function checkWeather(){
-            const response = await fetch(apiUrl + `&appid=${apiKey}`);
-            var data = await response.json();
+      // variavel que vai pegar os valores digitados no campo de pesquisa
+      const searchBox = document.querySelector(".search input");
+      const searchBnt = document.querySelector(".search button");
+      const weatherIcon = document.querySelector(".weather-icon");
 
-            console.log(data);
+      // funcao que vai usar os parametros da api
+      async function checkWeather(city) {
+        const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+
+        // tratamento de erro caso alguem digite o nome da cidade invalida
+        if (response.status == 404) {
+          document.querySelector(".error").style.display = "block";
+          document.querySelector(".weather").style.display = "none";
+        } else {
+          var data = await response.json();
+
+          console.log(data);
+
+          // jogando as informacoes de temperatura, humidade, velocidade do vento pela cidade
+          document.querySelector(".city").innerHTML = data.name;
+          document.querySelector(".temp").innerHTML =
+            Math.round(data.main.temp) + "°C";
+          document.querySelector(".humidity").innerHTML =
+            data.main.humidity + "%";
+          document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
+
+          // mudar o icone de acordo com o clima de cada cidade
+          if (data.weather[0].main == "Clouds") {
+            weatherIcon.src = "assets/cloudy_5904053.png";
+          } else if (data.weather[0].main == "Clear") {
+            weatherIcon.src = "assets/sun_3073665.png";
+          } else if (data.weather[0].main == "Rain") {
+            weatherIcon.src = "assets/storm_728137.png";
+          } else if (data.weather[0].main == "Drizzle") {
+            weatherIcon.src = "assets/rainy-day_10961114.png";
+          } else if (data.weather[0].main == "Mist") {
+            weatherIcon.src = "assets/fog_10763290.png";
+          }
+
+          // a aplicacao comeca vazia e aparece quando chama uma cidade
+          document.querySelector(".weather").style.display = "block";
+          document.querySelector(".error").style.display = "none";
         }
+      }
 
-        checkWeather();
+      // evento do botao que pega o nome da cidade digitado na barra de pesquisa
+      searchBnt.addEventListener("click", () => {
+        checkWeather(searchBox.value);
+      });
+
     </script>
-    
   </body>
 </html>
